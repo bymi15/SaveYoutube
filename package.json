@@ -1,12 +1,33 @@
 {
-  "name": "saveyoutube",
-  "version": "0.1.0",
+  "name": "@bymi15/saveyoutube",
+  "version": "0.2.0",
   "description": "Save youtube videos and playlists as mp3/mp4 files",
   "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bymi15/SaveYoutube.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/bymi15"
+  },
+  "keywords": [
+    "youtube",
+    "saveyoutube",
+    "javascript",
+    "nodejs",
+    "express",
+    "ffmpeg"
+  ],
+  "author": "Brian Min <bymi15@yahoo.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bymi15/SaveYoutube/issues"
+  },
+  "homepage": "https://github.com/bymi15/SaveYoutube#readme",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon -V --exec node app.js"
+    "dev": "nodemon -V --exec node app.js",
+    "release": "standard-version"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -22,6 +43,7 @@
     "ytdl-core": "^3.3.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "standard-version": "^9.0.0"
   }
 }
