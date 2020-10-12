@@ -1,0 +1,161 @@
+<div class="jumbotron">
+    {{#if msg}}
+    <div id="message">
+        <div style="padding: 5px;">
+            <div id="inner-message" class="alert alert-success">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{msg}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    <div class="container">
+        <h1 style="text-align: center;">{{title}}</h1>
+        <div class="form-group">
+            <label for="videoURL">Youtube Video or Playlist URL</label>
+            <input type="text" class="form-control input-lg" name="videoURL" id="videoURL" placeholder="Paste the URL here...">
+            <div id="progress" class="progress progress-striped active hidden">
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:100%; line-height: 40px; font-size: 18px;">
+                Loading... Please Wait...
+              </div>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <button id="mp4Button" type="button" class="btn btn-success">Download as MP4</button>
+            <button id="mp3Button" type="button" class="btn btn-info">Download as MP3</button>
+            <button id="playlistButton" type="button" class="btn btn-default">Download playlist</button>
+            <a class="btn btn-warning" href="/clearUploads">Clear Uploads</a>
+        </div>
+    </div>
+</div>
+
+<div id="playlist" class="container"></div>
+
+<script>
+    var showProgress = function(){
+        $('#videoURL').addClass('hidden');
+        $('#progress').removeClass('hidden');
+        $('#mp4Button').attr("disabled", true);
+        $('#mp3Button').attr("disabled", true);
+        $('#playlistButton').attr("disabled", true);
+    }
+    var hideProgress = function(){
+        $('#videoURL').removeClass('hidden');
+        $('#progress').addClass('hidden');
+        $('#mp4Button').attr("disabled", false);
+        $('#mp3Button').attr("disabled", false);
+        $('#playlistButton').attr("disabled", false);
+        $("#mp4Button").html('Download as MP4');
+        $("#mp3Button").html('Download as MP3');
+        $("#playlistButton").html('Download playlist');
+    }
+    var appendPlaylistData = function(playlistHtml, data){
+        for(var key in data){
+            var title = data[key].name;
+            var vidID = data[key].id;
+            var vidURL = data[key].url;
+            var thumbnailSrc = 'https://img.youtube.com/vi/' + vidID + '/hqdefault.jpg';
+            var html = '<div class="playlist-item"><div class="media"><div class="media-left"><a href="' + vidURL + '" target="_blank"><img class="media-object" src="' + thumbnailSrc + '" height="72" width="128"></a></div><div class="media-body"><h4 style="color:#000000;" class="media-heading">' + title + '</h4><div class="media-buttons"><button class="download-btn btn btn-success" id="/mp4/' + vidID + '">Download MP4</button>&nbsp<button class="download-btn btn btn-primary" id="/mp3/' + vidID + '">Download MP3</button>&nbsp<span class="preloader" style="display:none;"><img width="50" src="/images/preloader.gif"></span></div></div></div></div>';
+            playlistHtml.append(html);
+        }
+    }
+
+    $("div").on("click", ".download-btn", function(){
+        var btn = $(this);
+        var btnVal = btn.text();
+        var endpoint = btn.attr('id');
+        btn.attr("disabled", true);
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Downloading...');
+        $.ajax({
+            type: 'GET',
+            url: endpoint,
+            success: function(data) {
+                btn.attr("disabled", false);
+                btn.html(btnVal);
+                window.open(data.downloadUrl, '_blank');
+            }
+        });
+    });
+
+    $("#mp4Button").click(function(){
+        var youtubeURL = $("#videoURL").val();
+
+        if(youtubeURL.trim() == '') return;
+
+        var data = {youtubeURL: youtubeURL};
+        showProgress();
+        $("#mp4Button").html('<i class="fa fa-spinner fa-spin"></i> Downloading...');
+
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            url: '/mp4',
+            success: function(data) {
+                if(data.error){
+                    console.log(data.error);
+                }else if(data.playlist){
+                    appendPlaylistData($("#playlist"), data.playlist);
+                }else if(data.downloadUrl){
+                    window.open(data.downloadUrl, '_blank');
+                }
+                hideProgress();
+            }
+        });
+    });
+
+    $("#mp3Button").click(function(){
+        var youtubeURL = $("#videoURL").val();
+
+        if(youtubeURL.trim() == '') return;
+
+        var data = {youtubeURL: youtubeURL};
+        showProgress();
+        $("#mp3Button").html('<i class="fa fa-spinner fa-spin"></i> Downloading...');
+
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            url: '/mp3',
+            success: function(data) {
+                console.log(data.file);
+                if(data.error){
+                    alert(data.error);
+                }else if(data.playlist){
+                    appendPlaylistData($("#playlist"), data.playlist);
+                }else if(data.downloadUrl){
+                    window.open(data.downloadUrl, '_blank');
+                }
+                hideProgress();
+            }
+        });
+    });
+
+    $("#playlistButton").click(function(){
+        var youtubeURL = $("#videoURL").val();
+
+        if(youtubeURL.trim() == '') return;
+
+        var data = {youtubeURL: youtubeURL};
+        showProgress();
+        $("#playlistButton").html('<i class="fa fa-spinner fa-spin"></i> Loading...');
+
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            url: '/playlist',
+            success: function(data) {
+                if(data.error){
+                    alert(data.error);
+                }else if(data.playlist){
+                    appendPlaylistData($("#playlist"), data.playlist);
+                }else{
+                    alert('An error has occurred. Please try again.');
+                }
+                hideProgress();
+            }
+        });
+    });
+</script>
