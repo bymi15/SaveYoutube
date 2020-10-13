@@ -1,6 +1,6 @@
 {
   "name": "@bymi15/saveyoutube",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Save youtube videos and playlists as mp3/mp4 files",
   "main": "app.js",
   "repository": {
