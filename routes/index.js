@@ -7,6 +7,7 @@ const ytlist = require('youtube-playlist');
 var url = require('url');
 var sanitize = require('sanitize-filename');
 const path = require('path');
+var pathToFfmpeg = require('ffmpeg-static');
 
 var router = express.Router();
 
@@ -38,11 +39,7 @@ const downloadYoutube = async (urlYoutube, type, res) => {
                 videoReadableStream = ytdl(urlYoutube);
             }
             var proc = new ffmpeg({source:videoReadableStream});
-            if(os.platform() === 'win32'){
-                proc.setFfmpegPath(path.resolve('./public/lib/ffmpeg.exe'));
-            }else{
-                proc.setFfmpegPath(path.resolve('./public/lib/ffmpeg'));
-            }
+            proc.setFfmpegPath(pathToFfmpeg);
             proc.toFormat(type).on('end', function() {
                 res.send({downloadUrl: '/download/' + fileName});
             }).on('error', function(err) {

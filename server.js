@@ -1,5 +1,3 @@
-var dotenv = require('dotenv');
-dotenv.config();
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
